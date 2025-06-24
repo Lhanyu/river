@@ -32,31 +32,79 @@
       v-if="waterLevelDialogVisible"
       :stationId="currentWaterLevelId"
       v-model:visible="waterLevelDialogVisible"
+      @edit="onWaterLevelEdit"
+    />
+    <WaterLevelStationEditDialog
+      v-if="waterLevelEditDialogVisible"
+      :visible="waterLevelEditDialogVisible"
+      :stationData="currentWaterLevelData"
+      v-model:visible="waterLevelEditDialogVisible"
+      @saved="onWaterLevelSaved"
     />
     <HydrologyStationDetailDialog
       v-if="hydrologyDialogVisible"
       :stationId="currentHydrologyId"
       v-model:visible="hydrologyDialogVisible"
+      @edit="onHydrologyEdit"
+    />
+    <HydrologyStationEditDialog
+      v-if="hydrologyEditDialogVisible"
+      :visible="hydrologyEditDialogVisible"
+      :stationData="currentHydrologyData"
+      v-model:visible="hydrologyEditDialogVisible"
+      @saved="onHydrologySaved"
     />
     <RainfallStationDetailDialog
       v-if="rainfallDialogVisible"
       :stationId="currentRainfallId"
       v-model:visible="rainfallDialogVisible"
+      @edit="onRainfallEdit"
+    />
+    <RainfallStationEditDialog
+      v-if="rainfallEditDialogVisible"
+      :visible="rainfallEditDialogVisible"
+      :stationData="currentRainfallData"
+      v-model:visible="rainfallEditDialogVisible"
+      @saved="onRainfallSaved"
     />
     <EvaporationStationDetailDialog
       v-if="evaporationDialogVisible"
       :stationId="currentEvaporationId"
       v-model:visible="evaporationDialogVisible"
+      @edit="onEvaporationEdit"
+    />
+    <EvaporationStationEditDialog
+      v-if="evaporationEditDialogVisible"
+      :visible="evaporationEditDialogVisible"
+      :stationData="currentEvaporationData"
+      v-model:visible="evaporationEditDialogVisible"
+      @saved="onEvaporationSaved"
     />
     <WaterQualityStationDetailDialog
       v-if="waterQualityDialogVisible"
       :stationId="currentWaterQualityId"
       v-model:visible="waterQualityDialogVisible"
+      @edit="onWaterQualityEdit"
+    />
+    <WaterQualityStationEditDialog
+      v-if="waterQualityEditDialogVisible"
+      :visible="waterQualityEditDialogVisible"
+      :stationData="currentWaterQualityData"
+      v-model:visible="waterQualityEditDialogVisible"
+      @saved="onWaterQualitySaved"
     />
     <SoilMoistureStationDetailDialog
       v-if="soilMoistureDialogVisible"
       :stationId="currentSoilMoistureId"
       v-model:visible="soilMoistureDialogVisible"
+      @edit="onSoilMoistureEdit"
+    />
+    <SoilMoistureStationEditDialog
+      v-if="soilMoistureEditDialogVisible"
+      :visible="soilMoistureEditDialogVisible"
+      :stationData="currentSoilMoistureData"
+      v-model:visible="soilMoistureEditDialogVisible"
+      @saved="onSoilMoistureSaved"
     />
   </div>
 </template>
@@ -65,12 +113,18 @@
 import { ref, computed, onMounted } from 'vue';
 import StationTable from './StationTable.vue';
 import { ElMessage } from 'element-plus';
-import WaterLevelStationDetailDialog from './WaterLevelStationDetailDialog.vue';
-import HydrologyStationDetailDialog from './HydrologyStationDetailDialog.vue';
-import RainfallStationDetailDialog from './RainfallStationDetailDialog.vue';
-import EvaporationStationDetailDialog from './EvaporationStationDetailDialog.vue';
-import WaterQualityStationDetailDialog from './WaterQualityStationDetailDialog.vue';
-import SoilMoistureStationDetailDialog from './SoilMoistureStationDetailDialog.vue';
+import WaterLevelStationDetailDialog from './waterlevel/WaterLevelStationDetailDialog.vue';
+import HydrologyStationDetailDialog from './hydrology/HydrologyStationDetailDialog.vue';
+import RainfallStationDetailDialog from './rainfall/RainfallStationDetailDialog.vue';
+import EvaporationStationDetailDialog from './evaporation/EvaporationStationDetailDialog.vue';
+import WaterQualityStationDetailDialog from './waterquality/WaterQualityStationDetailDialog.vue';
+import SoilMoistureStationDetailDialog from './soilmoisture/SoilMoistureStationDetailDialog.vue';
+import HydrologyStationEditDialog from './hydrology/HydrologyStationEditDialog.vue';
+import WaterLevelStationEditDialog from './waterlevel/WaterLevelStationEditDialog.vue';
+import RainfallStationEditDialog from './rainfall/RainfallStationEditDialog.vue';
+import EvaporationStationEditDialog from './evaporation/EvaporationStationEditDialog.vue';
+import WaterQualityStationEditDialog from './waterquality/WaterQualityStationEditDialog.vue';
+import SoilMoistureStationEditDialog from './soilmoisture/SoilMoistureStationEditDialog.vue';
 
 const stations = ref([]);
 const search = ref({ nameOrCode: '', basin: '', system: '', stationTypes: [] });
@@ -79,6 +133,7 @@ const systemOptions = ref([]);
 
 const waterLevelDialogVisible = ref(false);
 const currentWaterLevelId = ref(null);
+const currentWaterLevelData = ref(null);
 function showWaterLevelDetail(id) {
   currentWaterLevelId.value = id;
   waterLevelDialogVisible.value = true;
@@ -86,6 +141,7 @@ function showWaterLevelDetail(id) {
 
 const hydrologyDialogVisible = ref(false);
 const currentHydrologyId = ref(null);
+const currentHydrologyData = ref(null);
 function showHydrologyDetail(id) {
   currentHydrologyId.value = id;
   hydrologyDialogVisible.value = true;
@@ -93,6 +149,7 @@ function showHydrologyDetail(id) {
 
 const rainfallDialogVisible = ref(false);
 const currentRainfallId = ref(null);
+const currentRainfallData = ref(null);
 function showRainfallDetail(id) {
   currentRainfallId.value = id;
   rainfallDialogVisible.value = true;
@@ -100,6 +157,7 @@ function showRainfallDetail(id) {
 
 const evaporationDialogVisible = ref(false);
 const currentEvaporationId = ref(null);
+const currentEvaporationData = ref(null);
 function showEvaporationDetail(id) {
   currentEvaporationId.value = id;
   evaporationDialogVisible.value = true;
@@ -107,6 +165,7 @@ function showEvaporationDetail(id) {
 
 const waterQualityDialogVisible = ref(false);
 const currentWaterQualityId = ref(null);
+const currentWaterQualityData = ref(null);
 function showWaterQualityDetail(id) {
   currentWaterQualityId.value = id;
   waterQualityDialogVisible.value = true;
@@ -114,10 +173,18 @@ function showWaterQualityDetail(id) {
 
 const soilMoistureDialogVisible = ref(false);
 const currentSoilMoistureId = ref(null);
+const currentSoilMoistureData = ref(null);
 function showSoilMoistureDetail(id) {
   currentSoilMoistureId.value = id;
   soilMoistureDialogVisible.value = true;
 }
+
+const hydrologyEditDialogVisible = ref(false);
+const waterLevelEditDialogVisible = ref(false);
+const rainfallEditDialogVisible = ref(false);
+const evaporationEditDialogVisible = ref(false);
+const waterQualityEditDialogVisible = ref(false);
+const soilMoistureEditDialogVisible = ref(false);
 
 const columns = [
   { prop: 'basin_name', label: '流域名称', width: 120 },
@@ -164,6 +231,60 @@ const filteredStations = computed(() => {
     return matchNameOrCode && matchBasin && matchSystem && matchTypes;
   });
 });
+
+const onHydrologyEdit = (data) => {
+  currentHydrologyData.value = data;
+  hydrologyEditDialogVisible.value = true;
+};
+
+const onHydrologySaved = () => {
+  // Handle the saved event
+};
+
+const onWaterLevelEdit = (data) => {
+  currentWaterLevelData.value = data;
+  waterLevelEditDialogVisible.value = true;
+};
+
+const onWaterLevelSaved = () => {
+  // Handle the saved event
+};
+
+const onRainfallEdit = (data) => {
+  currentRainfallData.value = data;
+  rainfallEditDialogVisible.value = true;
+};
+
+const onRainfallSaved = () => {
+  // Handle the saved event
+};
+
+const onEvaporationEdit = (data) => {
+  currentEvaporationData.value = data;
+  evaporationEditDialogVisible.value = true;
+};
+
+const onEvaporationSaved = () => {
+  // Handle the saved event
+};
+
+const onWaterQualityEdit = (data) => {
+  currentWaterQualityData.value = data;
+  waterQualityEditDialogVisible.value = true;
+};
+
+const onWaterQualitySaved = () => {
+  // 可选：刷新列表
+};
+
+const onSoilMoistureEdit = (data) => {
+  currentSoilMoistureData.value = data;
+  soilMoistureEditDialogVisible.value = true;
+};
+
+const onSoilMoistureSaved = () => {
+  // 可选：刷新列表
+};
 
 onMounted(fetchStations);
 </script>

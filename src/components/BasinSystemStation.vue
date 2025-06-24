@@ -60,36 +60,97 @@
         测站列表（{{ selectedSystem ? (selectedSystem.river_system_name || '无水系') : '' }}）
       </template>
     </StationTable>
+    
+    <!-- 水位站详情和编辑对话框 -->
     <WaterLevelStationDetailDialog
       v-if="waterLevelDialogVisible"
       :stationId="currentWaterLevelId"
       v-model:visible="waterLevelDialogVisible"
+      @edit="onWaterLevelEdit"
     />
+    <WaterLevelStationEditDialog
+      v-if="waterLevelEditDialogVisible"
+      :visible="waterLevelEditDialogVisible"
+      :stationData="currentWaterLevelData"
+      v-model:visible="waterLevelEditDialogVisible"
+      @saved="onWaterLevelSaved"
+    />
+    
+    <!-- 水文站详情和编辑对话框 -->
     <HydrologyStationDetailDialog
       v-if="hydrologyDialogVisible"
       :stationId="currentHydrologyId"
       v-model:visible="hydrologyDialogVisible"
+      @edit="onHydrologyEdit"
     />
+    <HydrologyStationEditDialog
+      v-if="hydrologyEditDialogVisible"
+      :visible="hydrologyEditDialogVisible"
+      :stationData="currentHydrologyData"
+      v-model:visible="hydrologyEditDialogVisible"
+      @saved="onHydrologySaved"
+    />
+    
+    <!-- 雨量站详情和编辑对话框 -->
     <RainfallStationDetailDialog
       v-if="rainfallDialogVisible"
       :stationId="currentRainfallId"
       v-model:visible="rainfallDialogVisible"
+      @edit="onRainfallEdit"
     />
+    <RainfallStationEditDialog
+      v-if="rainfallEditDialogVisible"
+      :visible="rainfallEditDialogVisible"
+      :stationData="currentRainfallData"
+      v-model:visible="rainfallEditDialogVisible"
+      @saved="onRainfallSaved"
+    />
+    
+    <!-- 蒸发站详情和编辑对话框 -->
     <EvaporationStationDetailDialog
       v-if="evaporationDialogVisible"
       :stationId="currentEvaporationId"
       v-model:visible="evaporationDialogVisible"
+      @edit="onEvaporationEdit"
     />
+    <EvaporationStationEditDialog
+      v-if="evaporationEditDialogVisible"
+      :visible="evaporationEditDialogVisible"
+      :stationData="currentEvaporationData"
+      v-model:visible="evaporationEditDialogVisible"
+      @saved="onEvaporationSaved"
+    />
+    
+    <!-- 水质站详情和编辑对话框 -->
     <WaterQualityStationDetailDialog
       v-if="waterQualityDialogVisible"
       :stationId="currentWaterQualityId"
       v-model:visible="waterQualityDialogVisible"
+      @edit="onWaterQualityEdit"
     />
+    <WaterQualityStationEditDialog
+      v-if="waterQualityEditDialogVisible"
+      :visible="waterQualityEditDialogVisible"
+      :stationData="currentWaterQualityData"
+      v-model:visible="waterQualityEditDialogVisible"
+      @saved="onWaterQualitySaved"
+    />
+    
+    <!-- 墒情站详情和编辑对话框 -->
     <SoilMoistureStationDetailDialog
       v-if="soilMoistureDialogVisible"
       :stationId="currentSoilMoistureId"
       v-model:visible="soilMoistureDialogVisible"
+      @edit="onSoilMoistureEdit"
     />
+    <SoilMoistureStationEditDialog
+      v-if="soilMoistureEditDialogVisible"
+      :visible="soilMoistureEditDialogVisible"
+      :stationData="currentSoilMoistureData"
+      v-model:visible="soilMoistureEditDialogVisible"
+      @saved="onSoilMoistureSaved"
+    />
+    
     <el-card v-if="!selectedBasin || !selectedSystem" class="table-card" style="width: 100%">
       <template #header>
         <div class="card-header">
@@ -106,12 +167,19 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { ElMessage } from 'element-plus';
 import StationTable from './StationTable.vue';
-import WaterLevelStationDetailDialog from './WaterLevelStationDetailDialog.vue';
-import HydrologyStationDetailDialog from './HydrologyStationDetailDialog.vue';
-import RainfallStationDetailDialog from './RainfallStationDetailDialog.vue';
-import EvaporationStationDetailDialog from './EvaporationStationDetailDialog.vue';
-import WaterQualityStationDetailDialog from './WaterQualityStationDetailDialog.vue';
-import SoilMoistureStationDetailDialog from './SoilMoistureStationDetailDialog.vue';
+import WaterLevelStationDetailDialog from './waterlevel/WaterLevelStationDetailDialog.vue';
+import HydrologyStationDetailDialog from './hydrology/HydrologyStationDetailDialog.vue';
+import RainfallStationDetailDialog from './rainfall/RainfallStationDetailDialog.vue';
+import EvaporationStationDetailDialog from './evaporation/EvaporationStationDetailDialog.vue';
+import WaterQualityStationDetailDialog from './waterquality/WaterQualityStationDetailDialog.vue';
+import SoilMoistureStationDetailDialog from './soilmoisture/SoilMoistureStationDetailDialog.vue';
+// 添加编辑对话框组件的导入
+import WaterLevelStationEditDialog from './waterlevel/WaterLevelStationEditDialog.vue';
+import HydrologyStationEditDialog from './hydrology/HydrologyStationEditDialog.vue';
+import RainfallStationEditDialog from './rainfall/RainfallStationEditDialog.vue';
+import EvaporationStationEditDialog from './evaporation/EvaporationStationEditDialog.vue';
+import WaterQualityStationEditDialog from './waterquality/WaterQualityStationEditDialog.vue';
+import SoilMoistureStationEditDialog from './soilmoisture/SoilMoistureStationEditDialog.vue';
 
 const basins = ref([]);
 const riverSystems = ref([]);
@@ -193,43 +261,140 @@ const onSystemRowClick = (row) => {
   fetchStations(row.river_system_code);
 };
 
-// 弹窗相关
+// 详情弹窗相关
 const waterLevelDialogVisible = ref(false);
 const currentWaterLevelId = ref(null);
 function showWaterLevelDetail(id) {
   currentWaterLevelId.value = id;
   waterLevelDialogVisible.value = true;
 }
+
 const hydrologyDialogVisible = ref(false);
 const currentHydrologyId = ref(null);
 function showHydrologyDetail(id) {
   currentHydrologyId.value = id;
   hydrologyDialogVisible.value = true;
 }
+
 const rainfallDialogVisible = ref(false);
 const currentRainfallId = ref(null);
 function showRainfallDetail(id) {
   currentRainfallId.value = id;
   rainfallDialogVisible.value = true;
 }
+
 const evaporationDialogVisible = ref(false);
 const currentEvaporationId = ref(null);
 function showEvaporationDetail(id) {
   currentEvaporationId.value = id;
   evaporationDialogVisible.value = true;
 }
+
 const waterQualityDialogVisible = ref(false);
 const currentWaterQualityId = ref(null);
 function showWaterQualityDetail(id) {
   currentWaterQualityId.value = id;
   waterQualityDialogVisible.value = true;
 }
+
 const soilMoistureDialogVisible = ref(false);
 const currentSoilMoistureId = ref(null);
 function showSoilMoistureDetail(id) {
   currentSoilMoistureId.value = id;
   soilMoistureDialogVisible.value = true;
 }
+
+// 编辑弹窗相关状态变量
+const waterLevelEditDialogVisible = ref(false);
+const currentWaterLevelData = ref(null);
+
+const hydrologyEditDialogVisible = ref(false);
+const currentHydrologyData = ref(null);
+
+const rainfallEditDialogVisible = ref(false);
+const currentRainfallData = ref(null);
+
+const evaporationEditDialogVisible = ref(false);
+const currentEvaporationData = ref(null);
+
+const waterQualityEditDialogVisible = ref(false);
+const currentWaterQualityData = ref(null);
+
+const soilMoistureEditDialogVisible = ref(false);
+const currentSoilMoistureData = ref(null);
+
+// 编辑事件处理函数
+const onWaterLevelEdit = (data) => {
+  currentWaterLevelData.value = data;
+  waterLevelEditDialogVisible.value = true;
+};
+
+const onWaterLevelSaved = () => {
+  // 保存后刷新数据
+  if (selectedSystem.value) {
+    fetchStations(selectedSystem.value.river_system_code);
+  }
+};
+
+const onHydrologyEdit = (data) => {
+  currentHydrologyData.value = data;
+  hydrologyEditDialogVisible.value = true;
+};
+
+const onHydrologySaved = () => {
+  // 保存后刷新数据
+  if (selectedSystem.value) {
+    fetchStations(selectedSystem.value.river_system_code);
+  }
+};
+
+const onRainfallEdit = (data) => {
+  currentRainfallData.value = data;
+  rainfallEditDialogVisible.value = true;
+};
+
+const onRainfallSaved = () => {
+  // 保存后刷新数据
+  if (selectedSystem.value) {
+    fetchStations(selectedSystem.value.river_system_code);
+  }
+};
+
+const onEvaporationEdit = (data) => {
+  currentEvaporationData.value = data;
+  evaporationEditDialogVisible.value = true;
+};
+
+const onEvaporationSaved = () => {
+  // 保存后刷新数据
+  if (selectedSystem.value) {
+    fetchStations(selectedSystem.value.river_system_code);
+  }
+};
+
+const onWaterQualityEdit = (data) => {
+  currentWaterQualityData.value = data;
+  waterQualityEditDialogVisible.value = true;
+};
+
+const onWaterQualitySaved = () => {
+  // 保存后刷新数据
+  if (selectedSystem.value) {
+    fetchStations(selectedSystem.value.river_system_code);
+  }
+};
+
+const onSoilMoistureEdit = (data) => {
+  currentSoilMoistureData.value = data;
+  soilMoistureEditDialogVisible.value = true;
+};
+
+const onSoilMoistureSaved = () => {
+  // 保存后刷新数据
+  if (selectedSystem.value) {
+    fetchStations(selectedSystem.value.river_system_code);
+  }
+};
 
 onMounted(() => {
   fetchBasins();

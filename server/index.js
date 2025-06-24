@@ -129,6 +129,7 @@ db.serialize(() => {
     station_name TEXT,
     station_code TEXT,
     basin_name TEXT,
+    river_system_name TEXT,
     longitude REAL,
     latitude REAL,
     management_unit TEXT,
@@ -147,6 +148,7 @@ db.serialize(() => {
     station_name TEXT,
     station_code TEXT,
     basin_name TEXT,
+    river_system_name TEXT,
     setup_year INTEGER,
     setup_month INTEGER,
     province TEXT,
@@ -196,6 +198,7 @@ db.serialize(() => {
     station_name TEXT,
     station_code TEXT,
     basin_name TEXT,
+    river_system_name TEXT,
     setup_year INTEGER,
     setup_month INTEGER,
     province TEXT,
@@ -409,7 +412,7 @@ async function importHydrologyStations() {
       await runAsync(
         `INSERT OR REPLACE INTO hydrology_stations (
           station_id, catchment_area, setup_year, setup_month, province, city, county, town, village, river_name, construction_unit, management_unit, survey_team, elevation, datum_name, datum_correction, annual_runoff, max_flow, max_flow_time, min_flow, min_flow_time, remark
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
         [
           station.id,
           row['集水面积-集水面积-集水面积'] || null,
@@ -541,6 +544,7 @@ async function importWaterLevelStations() {
     console.log('水位站数据已导入 water_level_stations 表。');
   } catch (e) {
     console.error('导入水位站数据出错:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
   }
 }
 
@@ -624,20 +628,21 @@ async function importRainfallStations() {
       // rainfall_stations表插入
       await runAsync(
         `INSERT OR REPLACE INTO rainfall_stations (
-          station_id, station_name, station_code, basin_name, longitude, latitude, management_unit, orifice_height, avg_rainfall, max_rainfall, max_rainfall_year, remark
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, orifice_height, avg_rainfall, max_rainfall, max_rainfall_year, remark
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
-          station.id,
-          name,
-          code,
+          station.id, 
+          name, 
+          code, 
           row['流域/区域-流域/区域-流域/区域'] || null,
-          lon,
-          lat,
+          system ? system.river_system_name : null,
+          lon, 
+          lat, 
           row['管理单位-水文部门-单位名称'] || null,
           row['器口高度\n（m）-器口高度\n（m）-器口高度\n（m）'] || null,
           row['特征值-多年平均降雨量（mm）-多年平均降雨量（mm）'] || null,
-          row[maxRainfallKey] || null,
-          row[maxRainfallYearKey] || null,
+          row['特征值-实测年最大降雨量（mm）-实测年最大降雨量（mm）'] || null,
+          row['特征值-出现年份-出现年份'] || null,
           row['备注-备注-备注'] || null
         ]
       );
@@ -721,13 +726,14 @@ async function importEvaporationStations() {
       // evaporation_stations表插入
       await runAsync(
         `INSERT OR REPLACE INTO evaporation_stations (
-          station_id, station_name, station_code, basin_name, setup_year, setup_month, province, city, county, town, village, management_unit, longitude, latitude, avg_evaporation, evaporator_type, remark
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          station_id, station_name, station_code, basin_name, river_system_name, setup_year, setup_month, province, city, county, town, village, management_unit, longitude, latitude, avg_evaporation, evaporator_type, remark
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           station.id,
           name,
           code,
           row['流域/区域-流域/区域-流域/区域'] || null,
+          system ? system.river_system_name : null,
           row['设站日期-年-年'] || null,
           row['设站日期-月-月'] || null,
           row['测站地址-所在省、自治区、直辖市-所在省、自治区、直辖市'] || null,
@@ -826,11 +832,11 @@ async function importWaterQualityStations() {
       await runAsync(
         `INSERT OR REPLACE INTO water_quality_stations (
           station_id, station_name, station_code, section_name, basin_name, river_system_name, river_name, setup_year, setup_month, func_area1, func_area2, province, city, county, town, village, longitude, latitude, management_unit, remark
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
         [
-          station.id,
-          name,
-          code,
+          station.id, 
+          name, 
+          code, 
           row['断面名称-断面名称-断面名称'] || null,
           row['流域/区域-流域/区域-流域/区域'] || null,
           row['水系-水系-水系'] || null,
@@ -846,7 +852,7 @@ async function importWaterQualityStations() {
           row['测站地址-所在村、街道-所在村、街道'] || null,
           lon,
           lat,
-          row['管理单位-水文部门-单位名称'] || row['管理单位-单位名称-单位名称'] || null,
+          row['管理单位-水文部门-单位名称'] || null,
           row['备注-备注-备注'] || null
         ]
       );
@@ -929,11 +935,9 @@ async function importSoilMoistureStations() {
       await runAsync(
         `INSERT OR REPLACE INTO soil_moisture_stations (
           station_id, station_name, station_code, basin_name, setup_year, setup_month, province, city, county, town, village, management_unit, longitude, latitude, remark
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
         [
-          station.id,
-          name,
-          code,
+          station.id, name, code,
           row['流域/区域-流域/区域-流域/区域'] || null,
           row['设站日期-年-年'] || null,
           row['设站日期-月-月'] || null,
@@ -942,7 +946,7 @@ async function importSoilMoistureStations() {
           row['测站地址-所在县、市-所在县、市'] || null,
           row['测站地址-所在乡、镇-所在乡、镇'] || null,
           row['测站地址-所在村、街道-所在村、街道'] || null,
-          row['管理单位-管理单位-管理单位'] || null,
+          row['管理单位-水文部门-单位名称'] || null,
           lon,
           lat,
           row['备注-备注-备注'] || null
@@ -1045,7 +1049,7 @@ app.get('/api/water_level_stations/:stationId', (req, res) => {
 app.get('/api/hydrology_stations/:stationId', (req, res) => {
   const stationId = req.params.stationId;
   db.get(
-    `SELECT hs.*, s.station_code, s.longitude, s.latitude, sys.basin_name, sys.river_system_name
+    `SELECT hs.*, s.station_name, s.station_code, s.longitude, s.latitude, sys.basin_name, sys.river_system_name
      FROM hydrology_stations hs
      LEFT JOIN stations s ON hs.station_id = s.id
      LEFT JOIN systems sys ON s.system_id = sys.id
@@ -1111,16 +1115,23 @@ app.get('/api/evaporation_stations/:stationId', (req, res) => {
 app.get('/api/water_quality_stations/:stationId', (req, res) => {
   const stationId = req.params.stationId;
   db.get(
-    `SELECT wqs.*, s.longitude, s.latitude, sys.basin_name, sys.river_system_name
+    `SELECT wqs.*, s.station_name, s.station_code, s.longitude, s.latitude, sys.basin_name, sys.river_system_name
      FROM water_quality_stations wqs
      LEFT JOIN stations s ON wqs.station_id = s.id
      LEFT JOIN systems sys ON s.system_id = sys.id
      WHERE wqs.station_id = ?`,
     [stationId],
     (err, row) => {
-      if (err) res.status(500).json({ error: err.message });
-      else if (!row) res.status(404).json({ error: 'Not found' });
-      else res.json(row);
+      if (err) {
+        console.error('获取水质站详情失败:', err);
+        res.status(500).json({ error: err.message });
+      } else if (!row) {
+        console.log('水质站详情未找到，stationId:', stationId);
+        res.status(404).json({ error: 'Not found' });
+      } else {
+        console.log('水质站详情查询成功:', row);
+        res.json(row);
+      }
     }
   );
 });
@@ -1158,7 +1169,7 @@ app.get('/api/station-types', (req, res) => {
 // 添加水文站
 app.post('/api/hydrology_stations', async (req, res) => {
   const {
-    station_name, station_code, longitude, latitude,
+    station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude,
     catchment_area, setup_year, setup_month, province, city, county, town, village,
     river_name, construction_unit, management_unit, survey_team, elevation, datum_name, datum_correction,
     annual_runoff, max_flow, max_flow_time, min_flow, min_flow_time, remark
@@ -1167,13 +1178,40 @@ app.post('/api/hydrology_stations', async (req, res) => {
     return res.status(400).json({ message: '测站名称和编码为必填' });
   }
   try {
-    // 1. 插入 stations
-    await runAsync(
-      'INSERT INTO stations (station_name, station_code, longitude, latitude, is_hydrology_station) VALUES (?, ?, ?, ?, 1)',
-      [station_name, station_code, longitude || null, latitude || null]
-    );
-    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
-    // 2. 插入 hydrology_stations
+    // 根据流域水系信息查找system_id
+    let system = null;
+    if (basin_name && river_system_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name = ?', [basin_name, river_system_name]);
+    } else if (basin_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name IS NULL', [basin_name]);
+    }
+    // 优先用station_id查找
+    let station = null;
+    if (station_id) {
+      station = await getAsync('SELECT id FROM stations WHERE id = ?', [station_id]);
+    }
+    if (!station) {
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    }
+    if (!station) {
+      // 如果不存在，插入新记录
+      await runAsync(
+        'INSERT INTO stations (station_name, station_code, system_id, longitude, latitude, is_hydrology_station) VALUES (?, ?, ?, ?, ?, 1)',
+        [station_name, station_code, system?.id || null, longitude || null, latitude || null]
+      );
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    } else {
+      // 如果存在，更新基本信息
+      await runAsync(
+        'UPDATE stations SET station_name = ?, system_id = ?, longitude = ?, latitude = ?, is_hydrology_station = 1 WHERE id = ?',
+        [station_name, system?.id || null, longitude || null, latitude || null, station.id]
+      );
+    }
+    
+    // 2. 先删除 hydrology_stations 表中的记录（只删除子表，不删除主表）
+    await runAsync('DELETE FROM hydrology_stations WHERE station_id = ?', [station.id]);
+    
+    // 3. 再插入新记录
     await runAsync(
       `INSERT INTO hydrology_stations (
         station_id, catchment_area, setup_year, setup_month, province, city, county, town, village, river_name, construction_unit, management_unit, survey_team, elevation, datum_name, datum_correction, annual_runoff, max_flow, max_flow_time, min_flow, min_flow_time, remark
@@ -1182,29 +1220,56 @@ app.post('/api/hydrology_stations', async (req, res) => {
         station.id, catchment_area, setup_year, setup_month, province, city, county, town, village, river_name, construction_unit, management_unit, survey_team, elevation, datum_name, datum_correction, annual_runoff, max_flow, max_flow_time, min_flow, min_flow_time, remark
       ]
     );
-    res.json({ message: '添加成功' });
+    res.json({ message: '保存成功', station_id: station.id });
   } catch (e) {
-    console.error('添加水文站失败:', e);
-    res.status(500).json({ message: '添加失败', error: e.message });
+    console.error('保存水文站失败:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
   }
 });
 
 // 添加水位站
 app.post('/api/water_level_stations', async (req, res) => {
   const {
-    station_name, station_code, basin_name, river_system_name, longitude, latitude, station_type, catchment_area, setup_year, setup_month, province, city, county, town, village, river_name, elevation, datum_name, datum_correction, construction_unit, management_unit, survey_team, remark, is_boundary_section, water_level_feature, observation_method, record_method
+    station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude, station_type, catchment_area, setup_year, setup_month, province, city, county, town, village, river_name, elevation, datum_name, datum_correction, construction_unit, management_unit, survey_team, remark, is_boundary_section, water_level_feature, observation_method, record_method
   } = req.body;
   if (!station_name || !station_code) {
     return res.status(400).json({ message: '测站名称和编码为必填' });
   }
   try {
-    // 1. 插入 stations
-    await runAsync(
-      'INSERT INTO stations (station_name, station_code, longitude, latitude, is_water_level_station) VALUES (?, ?, ?, ?, 1)',
-      [station_name, station_code, longitude || null, latitude || null]
-    );
-    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
-    // 2. 插入 water_level_stations
+    // 优先用station_id查找
+    let system = null;
+    if (basin_name && river_system_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name = ?', [basin_name, river_system_name]);
+    } else if (basin_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name IS NULL', [basin_name]);
+    }
+    // 优先用station_id查找
+    let station = null;
+    if (station_id) {
+      station = await getAsync('SELECT id FROM stations WHERE id = ?', [station_id]);
+    }
+    if (!station) {
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    }
+    if (!station) {
+      // 如果不存在，插入新记录
+      await runAsync(
+        'INSERT INTO stations (station_name, station_code, system_id, longitude, latitude, is_water_level_station) VALUES (?, ?, ?, ?, ?, 1)',
+        [station_name, station_code, system?.id || null, longitude || null, latitude || null]
+      );
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    } else {
+      // 如果存在，更新基本信息
+      await runAsync(
+        'UPDATE stations SET station_name = ?, system_id = ?, longitude = ?, latitude = ?, is_water_level_station = 1 WHERE id = ?',
+        [station_name, system?.id || null, longitude || null, latitude || null, station.id]
+      );
+    }
+    
+    // 2. 先删除 water_level_stations 表中的记录（只删除子表，不删除主表）
+    await runAsync('DELETE FROM water_level_stations WHERE station_id = ?', [station.id]);
+    
+    // 3. 再插入新记录
     await runAsync(
       `INSERT INTO water_level_stations (
         station_id, station_name, station_code, basin_name, river_system_name, river_name, catchment_area, setup_year, setup_month, station_type, province, city, county, town, village, longitude, latitude, elevation, datum_name, datum_correction, construction_unit, management_unit, survey_team, is_boundary_section, water_level_feature, observation_method, record_method, remark
@@ -1213,12 +1278,359 @@ app.post('/api/water_level_stations', async (req, res) => {
         station.id, station_name, station_code, basin_name, river_system_name, river_name, catchment_area, setup_year, setup_month, station_type, province, city, county, town, village, longitude, latitude, elevation, datum_name, datum_correction, construction_unit, management_unit, survey_team, is_boundary_section, water_level_feature, observation_method, record_method, remark
       ]
     );
-    res.json({ message: '添加成功' });
+    res.json({ message: '保存成功', station_id: station.id });
   } catch (e) {
-    console.error('添加水位站失败:', e);
-    res.status(500).json({ message: '添加失败', error: e.message });
+    console.error('保存水位站失败:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
   }
 });
+
+// 添加或覆写雨量站
+app.post('/api/rainfall_stations', async (req, res) => {
+  const {
+    station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, orifice_height, avg_rainfall, max_rainfall, max_rainfall_year, remark
+  } = req.body;
+  if (!station_name || !station_code) {
+    return res.status(400).json({ message: '测站名称和编码为必填' });
+  }
+  try {
+    // 优先用station_id查找
+    let system = null;
+    if (basin_name && river_system_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name = ?', [basin_name, river_system_name]);
+    } else if (basin_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name IS NULL', [basin_name]);
+    }
+    // 优先用station_id查找
+    let station = null;
+    if (station_id) {
+      station = await getAsync('SELECT id FROM stations WHERE id = ?', [station_id]);
+    }
+    if (!station) {
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    }
+    if (!station) {
+      // 如果不存在，插入新记录
+      await runAsync(
+        'INSERT INTO stations (station_name, station_code, system_id, longitude, latitude, is_rainfall_station) VALUES (?, ?, ?, ?, ?, 1)',
+        [station_name, station_code, system?.id || null, longitude || null, latitude || null]
+      );
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    } else {
+      // 如果存在，更新基本信息
+      await runAsync(
+        'UPDATE stations SET station_name = ?, system_id = ?, longitude = ?, latitude = ?, is_rainfall_station = 1 WHERE id = ?',
+        [station_name, system?.id || null, longitude || null, latitude || null, station.id]
+      );
+    }
+    
+    // 2. 先删除 rainfall_stations 表中的记录（只删除子表，不删除主表）
+    await runAsync('DELETE FROM rainfall_stations WHERE station_id = ?', [station.id]);
+    
+    // 3. 再插入新记录
+    await runAsync(
+      `INSERT INTO rainfall_stations (
+        station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, orifice_height, avg_rainfall, max_rainfall, max_rainfall_year, remark
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        station.id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, orifice_height, avg_rainfall, max_rainfall, max_rainfall_year, remark
+      ]
+    );
+    res.json({ message: '保存成功', station_id: station.id });
+  } catch (e) {
+    console.error('保存雨量站失败:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
+  }
+});
+
+// 添加或覆写水质站
+app.post('/api/water_quality_stations', async (req, res) => {
+  const {
+    station_id, station_name, station_code, section_name, basin_name, river_system_name, river_name, setup_year, setup_month, func_area1, func_area2, province, city, county, town, village, longitude, latitude, management_unit, remark
+  } = req.body;
+  if (!station_name || !station_code) {
+    return res.status(400).json({ message: '测站名称和编码为必填' });
+  }
+  try {
+    let system = null;
+    if (basin_name && river_system_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name = ?', [basin_name, river_system_name]);
+    } else if (basin_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name IS NULL', [basin_name]);
+    }
+    // 优先用station_id查找
+    let station = null;
+    if (station_id) {
+      station = await getAsync('SELECT id FROM stations WHERE id = ?', [station_id]);
+    }
+    if (!station) {
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    }
+    if (!station) {
+      // 如果不存在，插入新记录
+      await runAsync(
+        'INSERT INTO stations (station_name, station_code, system_id, longitude, latitude, is_water_quality_station) VALUES (?, ?, ?, ?, ?, 1)',
+        [station_name, station_code, system?.id || null, longitude || null, latitude || null]
+      );
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    } else {
+      // 如果存在，更新基本信息
+      await runAsync(
+        'UPDATE stations SET station_name = ?, system_id = ?, longitude = ?, latitude = ?, is_water_quality_station = 1 WHERE id = ?',
+        [station_name, system?.id || null, longitude || null, latitude || null, station.id]
+      );
+    }
+    
+    // 2. 先删除 water_quality_stations 表中的记录（只删除子表，不删除主表）
+    await runAsync('DELETE FROM water_quality_stations WHERE station_id = ?', [station.id]);
+    
+    // 3. 再插入新记录
+    await runAsync(
+      `INSERT INTO water_quality_stations (
+        station_id, station_name, station_code, section_name, basin_name, river_system_name, river_name, setup_year, setup_month, func_area1, func_area2, province, city, county, town, village, longitude, latitude, management_unit, remark
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+      [
+        station.id, station_name, station_code, section_name, basin_name, river_system_name, river_name, setup_year, setup_month, func_area1, func_area2, province, city, county, town, village, longitude, latitude, management_unit, remark
+      ]
+    );
+    res.json({ message: '保存成功', station_id: station.id });
+  } catch (e) {
+    console.error('保存水质站失败:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
+  }
+});
+
+// 添加或覆写墒情站
+app.post('/api/soil_moisture_stations', async (req, res) => {
+  const {
+    station_id, station_name, station_code, basin_name, river_system_name, setup_year, setup_month, province, city, county, town, village, management_unit, longitude, latitude, remark
+  } = req.body;
+  if (!station_name || !station_code) {
+    return res.status(400).json({ message: '测站名称和编码为必填' });
+  }
+  try {
+    let system = null;
+    if (basin_name && river_system_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name = ?', [basin_name, river_system_name]);
+    } else if (basin_name) {
+      system = await getAsync('SELECT id FROM systems WHERE basin_name = ? AND river_system_name IS NULL', [basin_name]);
+    }
+    // 优先用station_id查找
+    let station = null;
+    if (station_id) {
+      station = await getAsync('SELECT id FROM stations WHERE id = ?', [station_id]);
+    }
+    if (!station) {
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    }
+    if (!station) {
+      // 如果不存在，插入新记录
+      await runAsync(
+        'INSERT INTO stations (station_name, station_code, system_id, longitude, latitude, is_soil_moisture_station) VALUES (?, ?, ?, ?, ?, 1)',
+        [station_name, station_code, system?.id || null, longitude || null, latitude || null]
+      );
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    } else {
+      // 如果存在，更新基本信息
+      await runAsync(
+        'UPDATE stations SET station_name = ?, system_id = ?, longitude = ?, latitude = ?, is_soil_moisture_station = 1 WHERE id = ?',
+        [station_name, system?.id || null, longitude || null, latitude || null, station.id]
+      );
+    }
+    // 2. 先删除 soil_moisture_stations 表中的记录
+    await runAsync('DELETE FROM soil_moisture_stations WHERE station_id = ?', [station.id]);
+    // 3. 再插入新记录
+    await runAsync(
+      `INSERT INTO soil_moisture_stations (
+        station_id, station_name, station_code, basin_name, river_system_name, setup_year, setup_month, province, city, county, town, village, management_unit, longitude, latitude, remark
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+      [
+        station.id, station_name, station_code, basin_name, river_system_name, setup_year, setup_month, province, city, county, town, village, management_unit, longitude, latitude, remark
+      ]
+    );
+    res.json({ message: '保存成功', station_id: station.id });
+  } catch (e) {
+    console.error('保存墒情站失败:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
+  }
+});
+
+// 添加或覆写蒸发站
+app.post('/api/evaporation_stations', async (req, res) => {
+  const {
+    station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, avg_evaporation, evaporator_type, remark
+  } = req.body;
+  if (!station_name || !station_code) {
+    return res.status(400).json({ message: '测站名称和编码为必填' });
+  }
+  try {
+    // 优先用station_id查找
+    let station = null;
+    if (station_id) {
+      station = await getAsync('SELECT id FROM stations WHERE id = ?', [station_id]);
+    }
+    if (!station) {
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    }
+    if (!station) {
+      // 如果不存在，插入新记录
+      await runAsync(
+        'INSERT INTO stations (station_name, station_code, longitude, latitude, is_evaporation_station) VALUES (?, ?, ?, ?, 1)',
+        [station_name, station_code, longitude || null, latitude || null]
+      );
+      station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    } else {
+      // 如果存在，更新基本信息
+      await runAsync(
+        'UPDATE stations SET station_name = ?, longitude = ?, latitude = ?, is_evaporation_station = 1 WHERE id = ?',
+        [station_name, longitude || null, latitude || null, station.id]
+      );
+    }
+    
+    // 2. 先删除 evaporation_stations 表中的记录（只删除子表，不删除主表）
+    await runAsync('DELETE FROM evaporation_stations WHERE station_id = ?', [station.id]);
+    
+    // 3. 再插入新记录
+    await runAsync(
+      `INSERT INTO evaporation_stations (
+        station_id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, avg_evaporation, evaporator_type, remark
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)` ,
+      [
+        station.id, station_name, station_code, basin_name, river_system_name, longitude, latitude, management_unit, avg_evaporation, evaporator_type, remark
+      ]
+    );
+    res.json({ message: '保存成功', station_id: station.id });
+  } catch (e) {
+    console.error('保存蒸发站失败:', e);
+    res.status(500).json({ message: '保存失败', error: e.message });
+  }
+});
+
+// 删除水文站
+app.delete('/api/hydrology_stations/:station_code', async (req, res) => {
+  const { station_code } = req.params;
+  try {
+    // 1. 查找station_id
+    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    if (!station) return res.json({ message: '已删除或不存在' });
+    // 2. 删除hydrology_stations表记录
+    await runAsync('DELETE FROM hydrology_stations WHERE station_id = ?', [station.id]);
+    // 3. 更新stations表is_hydrology_station为0
+    await runAsync('UPDATE stations SET is_hydrology_station = 0 WHERE id = ?', [station.id]);
+    // 4. 检查所有is_xxx字段
+    const s = await getAsync('SELECT is_hydrology_station, is_water_level_station, is_rainfall_station, is_evaporation_station, is_water_quality_station, is_soil_moisture_station FROM stations WHERE id = ?', [station.id]);
+    if (s && !s.is_hydrology_station && !s.is_water_level_station && !s.is_rainfall_station && !s.is_evaporation_station && !s.is_water_quality_station && !s.is_soil_moisture_station) {
+      await runAsync('DELETE FROM stations WHERE id = ?', [station.id]);
+    }
+    res.json({ message: '删除成功' });
+  } catch (e) {
+    console.error('删除水文站失败:', e);
+    res.status(500).json({ message: '删除失败', error: e.message });
+  }
+});
+
+// 删除水位站
+app.delete('/api/water_level_stations/:station_code', async (req, res) => {
+  const { station_code } = req.params;
+  try {
+    // 1. 查找station_id
+    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    if (!station) return res.json({ message: '已删除或不存在' });
+    // 2. 删除water_level_stations表记录
+    await runAsync('DELETE FROM water_level_stations WHERE station_id = ?', [station.id]);
+    // 3. 更新stations表is_water_level_station为0
+    await runAsync('UPDATE stations SET is_water_level_station = 0 WHERE id = ?', [station.id]);
+    // 4. 检查所有is_xxx字段
+    const s = await getAsync('SELECT is_hydrology_station, is_water_level_station, is_rainfall_station, is_evaporation_station, is_water_quality_station, is_soil_moisture_station FROM stations WHERE id = ?', [station.id]);
+    if (s && !s.is_hydrology_station && !s.is_water_level_station && !s.is_rainfall_station && !s.is_evaporation_station && !s.is_water_quality_station && !s.is_soil_moisture_station) {
+      await runAsync('DELETE FROM stations WHERE id = ?', [station.id]);
+    }
+    res.json({ message: '删除成功' });
+  } catch (e) {
+    console.error('删除水位站失败:', e);
+    res.status(500).json({ message: '删除失败', error: e.message });
+  }
+});
+
+// 删除雨量站
+app.delete('/api/rainfall_stations/:station_code', async (req, res) => {
+  const { station_code } = req.params;
+  try {
+    // 1. 查找station_id
+    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    if (!station) return res.json({ message: '已删除或不存在' });
+    // 2. 删除rainfall_stations表记录
+    await runAsync('DELETE FROM rainfall_stations WHERE station_id = ?', [station.id]);
+    // 3. 更新stations表is_rainfall_station为0
+    await runAsync('UPDATE stations SET is_rainfall_station = 0 WHERE id = ?', [station.id]);
+    // 4. 检查所有is_xxx字段
+    const s = await getAsync('SELECT is_hydrology_station, is_water_level_station, is_rainfall_station, is_evaporation_station, is_water_quality_station, is_soil_moisture_station FROM stations WHERE id = ?', [station.id]);
+    if (s && !s.is_hydrology_station && !s.is_water_level_station && !s.is_rainfall_station && !s.is_evaporation_station && !s.is_water_quality_station && !s.is_soil_moisture_station) {
+      await runAsync('DELETE FROM stations WHERE id = ?', [station.id]);
+    }
+    res.json({ message: '删除成功' });
+  } catch (e) {
+    console.error('删除雨量站失败:', e);
+    res.status(500).json({ message: '删除失败', error: e.message });
+  }
+});
+
+// 删除蒸发站
+app.delete('/api/evaporation_stations/:station_code', async (req, res) => {
+  const { station_code } = req.params;
+  try {
+    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    if (!station) return res.json({ message: '已删除或不存在' });
+    await runAsync('DELETE FROM evaporation_stations WHERE station_id = ?', [station.id]);
+    await runAsync('UPDATE stations SET is_evaporation_station = 0 WHERE id = ?', [station.id]);
+    const s = await getAsync('SELECT is_hydrology_station, is_water_level_station, is_rainfall_station, is_evaporation_station, is_water_quality_station, is_soil_moisture_station FROM stations WHERE id = ?', [station.id]);
+    if (s && !s.is_hydrology_station && !s.is_water_level_station && !s.is_rainfall_station && !s.is_evaporation_station && !s.is_water_quality_station && !s.is_soil_moisture_station) {
+      await runAsync('DELETE FROM stations WHERE id = ?', [station.id]);
+    }
+    res.json({ message: '删除成功' });
+  } catch (e) {
+    console.error('删除蒸发站失败:', e);
+    res.status(500).json({ message: '删除失败', error: e.message });
+  }
+});
+
+// 删除水质站
+app.delete('/api/water_quality_stations/:station_code', async (req, res) => {
+  const { station_code } = req.params;
+  try {
+    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    if (!station) return res.json({ message: '已删除或不存在' });
+    await runAsync('DELETE FROM water_quality_stations WHERE station_id = ?', [station.id]);
+    await runAsync('UPDATE stations SET is_water_quality_station = 0 WHERE id = ?', [station.id]);
+    const s = await getAsync('SELECT is_hydrology_station, is_water_level_station, is_rainfall_station, is_evaporation_station, is_water_quality_station, is_soil_moisture_station FROM stations WHERE id = ?', [station.id]);
+    if (s && !s.is_hydrology_station && !s.is_water_level_station && !s.is_rainfall_station && !s.is_evaporation_station && !s.is_water_quality_station && !s.is_soil_moisture_station) {
+      await runAsync('DELETE FROM stations WHERE id = ?', [station.id]);
+    }
+    res.json({ message: '删除成功' });
+  } catch (e) {
+    console.error('删除水质站失败:', e);
+    res.status(500).json({ message: '删除失败', error: e.message });
+  }
+});
+// 删除墒情站
+app.delete('/api/soil_moisture_stations/:station_code', async (req, res) => {
+  const { station_code } = req.params;
+  try {
+    const station = await getAsync('SELECT id FROM stations WHERE station_code = ?', [station_code]);
+    if (!station) return res.json({ message: '已删除或不存在' });
+    await runAsync('DELETE FROM soil_moisture_stations WHERE station_id = ?', [station.id]);
+    await runAsync('UPDATE stations SET is_soil_moisture_station = 0 WHERE id = ?', [station.id]);
+    const s = await getAsync('SELECT is_hydrology_station, is_water_level_station, is_rainfall_station, is_evaporation_station, is_water_quality_station, is_soil_moisture_station FROM stations WHERE id = ?', [station.id]);
+    if (s && !s.is_hydrology_station && !s.is_water_level_station && !s.is_rainfall_station && !s.is_evaporation_station && !s.is_water_quality_station && !s.is_soil_moisture_station) {
+      await runAsync('DELETE FROM stations WHERE id = ?', [station.id]);
+    }
+    res.json({ message: '删除成功' });
+  } catch (e) {
+    console.error('删除墒情站失败:', e);
+    res.status(500).json({ message: '删除失败', error: e.message });
+  }
+});
+
 
 // 启动服务器
 app.listen(PORT, async () => {

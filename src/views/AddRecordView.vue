@@ -20,51 +20,74 @@
         <el-button type="primary" :disabled="!selectedType" @click="openAddDialog">添加</el-button>
       </div>
     </div>
-    <AddHydrologyStationDialog
+    <HydrologyStationEditDialog
       v-if="addDialogType === 'hydrology' && addDialogVisible"
       :visible="addDialogVisible"
-      @update:visible="addDialogVisible = $event"
-      @submit="handleAddHydrologyStation"
+      :stationData="{}"
+      v-model:visible="addDialogVisible"
+      :isAdd="true"
+      @saved="handleAddHydrologyStationSaved"
     />
-    <AddWaterLevelStationDialog
+    <WaterLevelStationEditDialog
       v-if="addDialogType === 'waterlevel' && addDialogVisible"
       :visible="addDialogVisible"
-      @update:visible="addDialogVisible = $event"
-      @submit="handleAddWaterLevelStation"
+      :stationData="{}"
+      v-model:visible="addDialogVisible"
+      :isAdd="true"
+      @saved="handleAddWaterLevelStationSaved"
+    />
+    <RainfallStationEditDialog
+      v-if="addDialogType === 'rainfall' && addDialogVisible"
+      :visible="addDialogVisible"
+      :stationData="{}"
+      v-model:visible="addDialogVisible"
+      :isAdd="true"
+      @saved="handleAddRainfallStationSaved"
+    />
+    <EvaporationStationEditDialog
+      v-if="addDialogType === 'evaporation' && addDialogVisible"
+      :visible="addDialogVisible"
+      :stationData="{}"
+      v-model:visible="addDialogVisible"
+      :isAdd="true"
+      @saved="handleAddEvaporationStationSaved"
+    />
+    <WaterQualityStationEditDialog
+      v-if="addDialogType === 'waterquality' && addDialogVisible"
+      :visible="addDialogVisible"
+      :stationData="{}"
+      v-model:visible="addDialogVisible"
+      :isAdd="true"
+      @saved="handleAddWaterQualityStationSaved"
+    />
+    <SoilMoistureStationEditDialog
+      v-if="addDialogType === 'soilmoisture' && addDialogVisible"
+      :visible="addDialogVisible"
+      :stationData="{}"
+      v-model:visible="addDialogVisible"
+      :isAdd="true"
+      @saved="handleAddSoilMoistureStationSaved"
     />
   </el-card>
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import { ElMessage } from 'element-plus';
-import WaterLevelStationDetailDialog from '../components/WaterLevelStationDetailDialog.vue';
-import HydrologyStationDetailDialog from '../components/HydrologyStationDetailDialog.vue';
-import RainfallStationDetailDialog from '../components/RainfallStationDetailDialog.vue';
-import EvaporationStationDetailDialog from '../components/EvaporationStationDetailDialog.vue';
-import WaterQualityStationDetailDialog from '../components/WaterQualityStationDetailDialog.vue';
-import SoilMoistureStationDetailDialog from '../components/SoilMoistureStationDetailDialog.vue';
-import AddHydrologyStationDialog from '../components/AddHydrologyStationDialog.vue';
-import AddWaterLevelStationDialog from '../components/AddWaterLevelStationDialog.vue';
+import HydrologyStationEditDialog from '../components/hydrology/HydrologyStationEditDialog.vue';
+import WaterLevelStationEditDialog from '../components/waterlevel/WaterLevelStationEditDialog.vue';
+import RainfallStationEditDialog from '../components/rainfall/RainfallStationEditDialog.vue';
+import EvaporationStationEditDialog from '../components/evaporation/EvaporationStationEditDialog.vue';
+import WaterQualityStationEditDialog from '../components/waterquality/WaterQualityStationEditDialog.vue';
+import SoilMoistureStationEditDialog from '../components/soilmoisture/SoilMoistureStationEditDialog.vue';
 
 const username = ref('');
 const stationTypes = ref([]);
 const selectedType = ref('');
 const addDialogVisible = ref(false);
 const addDialogType = ref('');
-const addFormData = ref({});
-
-const typeToComponent = {
-  is_hydrology_station: HydrologyStationDetailDialog,
-  is_water_level_station: WaterLevelStationDetailDialog,
-  is_rainfall_station: RainfallStationDetailDialog,
-  is_evaporation_station: EvaporationStationDetailDialog,
-  is_water_quality_station: WaterQualityStationDetailDialog,
-  is_soil_moisture_station: SoilMoistureStationDetailDialog
-};
 
 onMounted(async () => {
-  // 获取用户名
   try {
     const token = localStorage.getItem('token');
     if (token) {
@@ -72,7 +95,6 @@ onMounted(async () => {
       username.value = payload.username;
     }
   } catch {}
-  // 获取测站类型
   try {
     const res = await fetch('/api/station-types');
     stationTypes.value = await res.json();
@@ -88,42 +110,45 @@ function openAddDialog() {
   } else if (selectedType.value === 'is_water_level_station') {
     addDialogType.value = 'waterlevel';
     addDialogVisible.value = true;
+  } else if (selectedType.value === 'is_rainfall_station') {
+    addDialogType.value = 'rainfall';
+    addDialogVisible.value = true;
+  } else if (selectedType.value === 'is_evaporation_station') {
+    addDialogType.value = 'evaporation';
+    addDialogVisible.value = true;
+  } else if (selectedType.value === 'is_water_quality_station') {
+    addDialogType.value = 'waterquality';
+    addDialogVisible.value = true;
+  } else if (selectedType.value === 'is_soil_moisture_station') {
+    addDialogType.value = 'soilmoisture';
+    addDialogVisible.value = true;
   } else {
-    ElMessage.warning('目前仅支持添加水文站和水位站');
+    ElMessage.warning('请选择有效的测站类型');
   }
 }
 
-async function handleAddHydrologyStation(data) {
-  // 提交所有字段到 /api/hydrology_stations
-  try {
-    const res = await fetch('/api/hydrology_stations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.message || '添加失败');
-    ElMessage.success('添加成功');
-    addDialogVisible.value = false;
-  } catch (e) {
-    ElMessage.error(e.message);
-  }
+async function handleAddHydrologyStationSaved() {
+  addDialogVisible.value = false;
 }
 
-async function handleAddWaterLevelStation(data) {
-  try {
-    const res = await fetch('/api/water_level_stations', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data)
-    });
-    const result = await res.json();
-    if (!res.ok) throw new Error(result.message || '添加失败');
-    ElMessage.success('添加成功');
-    addDialogVisible.value = false;
-  } catch (e) {
-    ElMessage.error(e.message);
-  }
+async function handleAddWaterLevelStationSaved() {
+  addDialogVisible.value = false;
+}
+
+async function handleAddRainfallStationSaved() {
+  addDialogVisible.value = false;
+}
+
+async function handleAddEvaporationStationSaved() {
+  addDialogVisible.value = false;
+}
+
+async function handleAddWaterQualityStationSaved() {
+  addDialogVisible.value = false;
+}
+
+async function handleAddSoilMoistureStationSaved() {
+  addDialogVisible.value = false;
 }
 </script>
 
