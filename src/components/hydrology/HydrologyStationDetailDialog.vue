@@ -4,8 +4,8 @@
       <el-descriptions-item label="测站编码">{{ detail.station_code }}</el-descriptions-item>
       <el-descriptions-item label="流域">{{ detail.basin_name }}</el-descriptions-item>
       <el-descriptions-item label="水系">{{ detail.river_system_name }}</el-descriptions-item>
-      <el-descriptions-item label="经度">{{ detail.longitude }}</el-descriptions-item>
-      <el-descriptions-item label="纬度">{{ detail.latitude }}</el-descriptions-item>
+      <el-descriptions-item label="经度">{{ format2(detail.longitude) }}</el-descriptions-item>
+      <el-descriptions-item label="纬度">{{ format2(detail.latitude) }}</el-descriptions-item>
       <el-descriptions-item label="集水面积">{{ detail.catchment_area }}</el-descriptions-item>
       <el-descriptions-item label="设站年份">{{ detail.setup_year }}</el-descriptions-item>
       <el-descriptions-item label="设站月份">{{ detail.setup_month }}</el-descriptions-item>
@@ -22,7 +22,7 @@
       <el-descriptions-item label="管理单位">{{ detail.management_unit }}</el-descriptions-item>
       <el-descriptions-item label="所属勘测队">{{ detail.survey_team }}</el-descriptions-item>
       <el-descriptions-item label="备注">{{ detail.remark }}</el-descriptions-item>
-      <el-descriptions-item label="全年平均径流量">{{ detail.annual_runoff }}</el-descriptions-item>
+      <el-descriptions-item label="全年平均径流量(亿m³)">{{ detail.annual_runoff }}</el-descriptions-item>
       <el-descriptions-item label="最大流量">{{ detail.max_flow }}</el-descriptions-item>
       <el-descriptions-item label="最大流量时间">{{ detail.max_flow_time }}</el-descriptions-item>
       <el-descriptions-item label="最小流量">{{ detail.min_flow }}</el-descriptions-item>
@@ -106,6 +106,10 @@ const onDelete = async () => {
     }
   }
 };
+function format2(val) {
+  if (val === null || val === undefined || isNaN(val)) return '';
+  return Number(val).toFixed(2);
+}
 </script>
 
 <style scoped>
@@ -152,4 +156,5 @@ const onDelete = async () => {
 :deep(.el-descriptions__cell) {
   width: 25%;
 }
+
 </style> 

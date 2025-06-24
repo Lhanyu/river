@@ -24,12 +24,6 @@
           <el-form-item label="集水面积" prop="catchment_area">
             <el-input v-model="form.catchment_area" type="number" />
           </el-form-item>
-          <el-form-item label="设站年份" prop="setup_year">
-            <el-input v-model="form.setup_year" type="number" />
-          </el-form-item>
-          <el-form-item label="设站月份" prop="setup_month">
-            <el-input v-model="form.setup_month" type="number" />
-          </el-form-item>
           <el-form-item label="河流" prop="river_name">
             <el-input v-model="form.river_name" />
           </el-form-item>
@@ -52,6 +46,12 @@
           </el-form-item>
           <el-form-item label="所属勘测队" prop="survey_team">
             <el-input v-model="form.survey_team" />
+          </el-form-item>
+          <el-form-item label="设站年份" prop="setup_year">
+            <el-input v-model="form.setup_year" type="number" />
+          </el-form-item>
+          <el-form-item label="设站月份" prop="setup_month">
+            <el-input v-model="form.setup_month" type="number" />
           </el-form-item>
         </el-col>
         <el-col :span="24">

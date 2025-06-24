@@ -3,8 +3,8 @@
     <el-descriptions v-if="detail" :title="detail.station_name" :column="2" border>
       <el-descriptions-item label="测站编码">{{ detail.station_code }}</el-descriptions-item>
       <el-descriptions-item label="流域">{{ detail.basin_name }}</el-descriptions-item>
-      <el-descriptions-item label="经度">{{ detail.longitude }}</el-descriptions-item>
-      <el-descriptions-item label="纬度">{{ detail.latitude }}</el-descriptions-item>
+      <el-descriptions-item label="经度">{{ format2(detail.longitude) }}</el-descriptions-item>
+      <el-descriptions-item label="纬度">{{ format2(detail.latitude) }}</el-descriptions-item>
       <el-descriptions-item label="管理单位">{{ detail.management_unit }}</el-descriptions-item>
       <el-descriptions-item label="器口高度(m)">{{ detail.orifice_height }}</el-descriptions-item>
       <el-descriptions-item label="多年平均降雨量(mm)">{{ detail.avg_rainfall }}</el-descriptions-item>
@@ -89,4 +89,8 @@ const onDelete = async () => {
     }
   }
 };
+function format2(val) {
+  if (val === null || val === undefined || isNaN(val)) return '';
+  return Number(val).toFixed(2);
+}
 </script> 

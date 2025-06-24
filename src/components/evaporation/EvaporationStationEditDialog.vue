@@ -1,6 +1,6 @@
 <template>
   <el-dialog :model-value="visible" :title="isAdd ? '添加蒸发站' : '编辑蒸发站'" width="900px" @close="onClose" @update:model-value="onDialogUpdate">
-    <el-form v-if="form" :model="form" label-width="120px" ref="formRef">
+    <el-form v-if="form" :model="form" label-width="150px" ref="formRef">
       <el-row :gutter="24">
         <el-col :span="12">
           <el-form-item label="测站编码" prop="station_code">

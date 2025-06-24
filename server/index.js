@@ -390,9 +390,21 @@ async function importHydrologyStations() {
         console.log(`[水文站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      // 经纬度
-      const lon = parseFloat(row['经度-经度-度'] || 0) + (parseFloat(row['经度-经度-分'] || 0)/60) + (parseFloat(row['经度-经度-秒'] || 0)/3600);
-      const lat = parseFloat(row['纬度-纬度-度'] || 0) + (parseFloat(row['纬度-纬度-分'] || 0)/60) + (parseFloat(row['纬度-纬度-秒'] || 0)/3600);
+      const lon = parseFloat(
+        (
+          parseFloat(row['经度-经度-度'] || 0) +
+          (parseFloat(row['经度-经度-分'] || 0) / 60) +
+          (parseFloat(row['经度-经度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
+      const lat = parseFloat(
+        (
+          parseFloat(row['纬度-纬度-度'] || 0) +
+          (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
+          (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
       // system_id
       const systemCode = row['水系-水系-水系']?.toString().trim();
       let system = null;
@@ -484,8 +496,22 @@ async function importWaterLevelStations() {
         continue;
       }
       // 经纬度
-      const lon = parseFloat(row['经度-经度-度'] || 0) + (parseFloat(row['经度-经度-分'] || 0)/60) + (parseFloat(row['经度-经度-秒'] || 0)/3600);
-      const lat = parseFloat(row['纬度-纬度-度'] || 0) + (parseFloat(row['纬度-纬度-分'] || 0)/60) + (parseFloat(row['纬度-纬度-秒'] || 0)/3600);
+      const lon = parseFloat(
+        (
+          parseFloat(row['经度-经度-度'] || 0) +
+          (parseFloat(row['经度-经度-分'] || 0) / 60) +
+          (parseFloat(row['经度-经度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
+      const lat = parseFloat(
+        (
+          parseFloat(row['纬度-纬度-度'] || 0) +
+          (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
+          (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
       // system_id
       const systemCode = row['水系-水系-水系']?.toString().trim();
       let system = null;
@@ -591,10 +617,21 @@ async function importRainfallStations() {
         continue;
       }
       // 经纬度
-      let lon = parseFloat(row['经度-经度-度'] || 0) + (parseFloat(row['经度-经度-分'] || 0)/60) + (parseFloat(row['经度-经度-秒'] || 0)/3600);
-      let lat = parseFloat(row['纬度-纬度-度'] || 0) + (parseFloat(row['纬度-纬度-分'] || 0)/60) + (parseFloat(row['纬度-纬度-秒'] || 0)/3600);
-      if (!isFinite(lon) || lon === 0) lon = null;
-      if (!isFinite(lat) || lat === 0) lat = null;
+      const lon = parseFloat(
+        (
+          parseFloat(row['经度-经度-度'] || 0) +
+          (parseFloat(row['经度-经度-分'] || 0) / 60) +
+          (parseFloat(row['经度-经度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
+      const lat = parseFloat(
+        (
+          parseFloat(row['纬度-纬度-度'] || 0) +
+          (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
+          (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
       // system_id 匹配
       let system = null;
       const basinCode = row['流域/区域-流域/区域-流域/区域']?.toString().trim();
@@ -693,10 +730,22 @@ async function importEvaporationStations() {
         continue;
       }
       // 经纬度
-      let lon = parseFloat(row['经度-度-度'] || 0) + (parseFloat(row['经度-分-分'] || 0)/60) + (parseFloat(row['经度-秒-秒'] || 0)/3600);
-      let lat = parseFloat(row['纬度-度-度'] || 0) + (parseFloat(row['纬度-分-分'] || 0)/60) + (parseFloat(row['纬度-秒-秒'] || 0)/3600);
-      if (!isFinite(lon) || lon === 0) lon = null;
-      if (!isFinite(lat) || lat === 0) lat = null;
+      const lon = parseFloat(
+        (
+          parseFloat(row['经度-经度-度'] || 0) +
+          (parseFloat(row['经度-经度-分'] || 0) / 60) +
+          (parseFloat(row['经度-经度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
+      const lat = parseFloat(
+        (
+          parseFloat(row['纬度-纬度-度'] || 0) +
+          (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
+          (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
       // system_id 匹配
       let system = null;
       const basinCode = row['流域/区域-流域/区域-流域/区域']?.toString().trim();
@@ -795,11 +844,22 @@ async function importWaterQualityStations() {
         console.log(`[水质站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      // 经纬度
-      let lon = parseFloat(row['经度-度-度'] || 0) + (parseFloat(row['经度-分-分'] || 0)/60) + (parseFloat(row['经度-秒-秒'] || 0)/3600);
-      let lat = parseFloat(row['纬度-度-度'] || 0) + (parseFloat(row['纬度-分-分'] || 0)/60) + (parseFloat(row['纬度-秒-秒'] || 0)/3600);
-      if (!isFinite(lon) || lon === 0) lon = null;
-      if (!isFinite(lat) || lat === 0) lat = null;
+      const lon = parseFloat(
+        (
+          parseFloat(row['经度-经度-度'] || 0) +
+          (parseFloat(row['经度-经度-分'] || 0) / 60) +
+          (parseFloat(row['经度-经度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
+      const lat = parseFloat(
+        (
+          parseFloat(row['纬度-纬度-度'] || 0) +
+          (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
+          (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
       // system_id 匹配
       let system = null;
       const basinCode = row['流域/区域-流域/区域-流域/区域']?.toString().trim();
@@ -902,11 +962,22 @@ async function importSoilMoistureStations() {
         console.log(`[墒情站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      // 经纬度
-      let lon = parseFloat(row['经度-度-度'] || 0) + (parseFloat(row['经度-分-分'] || 0)/60) + (parseFloat(row['经度-秒-秒'] || 0)/3600);
-      let lat = parseFloat(row['纬度-度-度'] || 0) + (parseFloat(row['纬度-分-分'] || 0)/60) + (parseFloat(row['纬度-秒-秒'] || 0)/3600);
-      if (!isFinite(lon) || lon === 0) lon = null;
-      if (!isFinite(lat) || lat === 0) lat = null;
+      const lon = parseFloat(
+        (
+          parseFloat(row['经度-经度-度'] || 0) +
+          (parseFloat(row['经度-经度-分'] || 0) / 60) +
+          (parseFloat(row['经度-经度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
+      const lat = parseFloat(
+        (
+          parseFloat(row['纬度-纬度-度'] || 0) +
+          (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
+          (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
+        ).toFixed(2)
+      );
+      
       // system_id 匹配
       let system = null;
       const basinCode = row['流域/区域-流域/区域-流域/区域']?.toString().trim();

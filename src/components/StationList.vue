@@ -285,7 +285,10 @@ const onSoilMoistureEdit = (data) => {
 const onSoilMoistureSaved = () => {
   // 可选：刷新列表
 };
-
+function format2(val) {
+  if (val === null || val === undefined || isNaN(val)) return '';
+  return Number(val).toFixed(2);
+}
 onMounted(fetchStations);
 </script>
 

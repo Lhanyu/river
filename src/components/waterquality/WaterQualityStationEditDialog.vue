@@ -27,6 +27,9 @@
           <el-form-item label="纬度" prop="latitude">
             <el-input v-model="form.latitude" type="number" />
           </el-form-item>
+          <el-form-item label="管理单位" prop="management_unit">
+            <el-input v-model="form.management_unit" />
+          </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="一级水功能区" prop="func_area1">
@@ -55,9 +58,6 @@
           </el-form-item>
           <el-form-item label="村街道" prop="village">
             <el-input v-model="form.village" />
-          </el-form-item>
-          <el-form-item label="管理单位" prop="management_unit">
-            <el-input v-model="form.management_unit" />
           </el-form-item>
         </el-col>
         <el-col :span="24">

@@ -1,6 +1,6 @@
 <template>
   <el-dialog :model-value="visible" :title="isAdd ? '添加水文站' : '编辑水文站'" width="900px" @close="onClose" @update:model-value="onDialogUpdate">
-    <el-form v-if="form" :model="form" label-width="120px" ref="formRef">
+    <el-form v-if="form" :model="form" label-width="150px" ref="formRef">
       <el-row :gutter="24">
         <el-col :span="12">
           <el-form-item label="测站编码" prop="station_code">
@@ -39,7 +39,7 @@
           <el-form-item label="县" prop="county">
             <el-input v-model="form.county" />
           </el-form-item>
-          <el-form-item label="全年平均径流量" prop="annual_runoff">
+          <el-form-item label="全年平均径流量(亿m³)" prop="annual_runoff">
             <el-input v-model="form.annual_runoff" type="number" />
           </el-form-item>
         </el-col>

@@ -1,6 +1,6 @@
 <template>
   <el-dialog :model-value="visible" :title="isAdd ? '添加雨量站' : '编辑雨量站'" width="900px" @close="onClose" @update:model-value="onDialogUpdate">
-    <el-form v-if="form" :model="form" label-width="120px" ref="formRef">
+    <el-form v-if="form" :model="form" label-width="155px" ref="formRef">
       <el-row :gutter="24">
         <el-col :span="12">
           <el-form-item label="测站编码" prop="station_code">
@@ -76,8 +76,8 @@ async function onSave() {
       station_code: form.value.station_code || '',
       basin_name: form.value.basin_name || '',
       river_system_name: form.value.river_system_name || null,
-      longitude: form.value.longitude ? parseFloat(form.value.longitude) : null,
-      latitude: form.value.latitude ? parseFloat(form.value.latitude) : null,
+      longitude: form.value.longitude ? parseFloat(form.value.longitude).toFixed(2) : null,
+      latitude: form.value.latitude ? parseFloat(form.value.latitude).toFixed(2) : null,
       management_unit: form.value.management_unit || '',
       orifice_height: form.value.orifice_height ? parseFloat(form.value.orifice_height) : null,
       avg_rainfall: form.value.avg_rainfall ? parseFloat(form.value.avg_rainfall) : null,
@@ -102,5 +102,9 @@ async function onSave() {
     console.error('保存失败:', error);
     ElMessage.error(error.message || '保存失败，请重试');
   }
+}
+function format2(val) {
+  if (val === null || val === undefined || isNaN(val)) return '';
+  return Number(val).toFixed(2);
 }
 </script> 
