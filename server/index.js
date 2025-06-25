@@ -390,7 +390,7 @@ async function importHydrologyStations() {
         console.log(`[水文站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      const lon = parseFloat(
+      let lon = parseFloat(
         (
           parseFloat(row['经度-经度-度'] || 0) +
           (parseFloat(row['经度-经度-分'] || 0) / 60) +
@@ -398,13 +398,15 @@ async function importHydrologyStations() {
         ).toFixed(2)
       );
       
-      const lat = parseFloat(
+      let lat = parseFloat(
         (
           parseFloat(row['纬度-纬度-度'] || 0) +
           (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
           (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
         ).toFixed(2)
       );
+      if (!isFinite(lon) || lon === 0) lon = null;
+      if (!isFinite(lat) || lat === 0) lat = null;
       // system_id
       const systemCode = row['水系-水系-水系']?.toString().trim();
       let system = null;
@@ -495,8 +497,7 @@ async function importWaterLevelStations() {
         console.log(`[水位站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      // 经纬度
-      const lon = parseFloat(
+      let lon = parseFloat(
         (
           parseFloat(row['经度-经度-度'] || 0) +
           (parseFloat(row['经度-经度-分'] || 0) / 60) +
@@ -504,13 +505,15 @@ async function importWaterLevelStations() {
         ).toFixed(2)
       );
       
-      const lat = parseFloat(
+      let lat = parseFloat(
         (
           parseFloat(row['纬度-纬度-度'] || 0) +
           (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
           (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
         ).toFixed(2)
       );
+      if (!isFinite(lon) || lon === 0) lon = null;
+      if (!isFinite(lat) || lat === 0) lat = null;
       
       // system_id
       const systemCode = row['水系-水系-水系']?.toString().trim();
@@ -616,8 +619,7 @@ async function importRainfallStations() {
         console.log(`[雨量站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      // 经纬度
-      const lon = parseFloat(
+      let lon = parseFloat(
         (
           parseFloat(row['经度-经度-度'] || 0) +
           (parseFloat(row['经度-经度-分'] || 0) / 60) +
@@ -625,13 +627,15 @@ async function importRainfallStations() {
         ).toFixed(2)
       );
       
-      const lat = parseFloat(
+      let lat = parseFloat(
         (
           parseFloat(row['纬度-纬度-度'] || 0) +
           (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
           (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
         ).toFixed(2)
       );
+      if (!isFinite(lon) || lon === 0) lon = null;
+      if (!isFinite(lat) || lat === 0) lat = null;
       // system_id 匹配
       let system = null;
       const basinCode = row['流域/区域-流域/区域-流域/区域']?.toString().trim();
@@ -729,8 +733,7 @@ async function importEvaporationStations() {
         console.log(`[蒸发站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      // 经纬度
-      const lon = parseFloat(
+      let lon = parseFloat(
         (
           parseFloat(row['经度-经度-度'] || 0) +
           (parseFloat(row['经度-经度-分'] || 0) / 60) +
@@ -738,13 +741,15 @@ async function importEvaporationStations() {
         ).toFixed(2)
       );
       
-      const lat = parseFloat(
+      let lat = parseFloat(
         (
           parseFloat(row['纬度-纬度-度'] || 0) +
           (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
           (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
         ).toFixed(2)
       );
+      if (!isFinite(lon) || lon === 0) lon = null;
+      if (!isFinite(lat) || lat === 0) lat = null;
       
       // system_id 匹配
       let system = null;
@@ -844,7 +849,7 @@ async function importWaterQualityStations() {
         console.log(`[水质站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      const lon = parseFloat(
+      let lon = parseFloat(
         (
           parseFloat(row['经度-经度-度'] || 0) +
           (parseFloat(row['经度-经度-分'] || 0) / 60) +
@@ -852,13 +857,15 @@ async function importWaterQualityStations() {
         ).toFixed(2)
       );
       
-      const lat = parseFloat(
+      let lat = parseFloat(
         (
           parseFloat(row['纬度-纬度-度'] || 0) +
           (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
           (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
         ).toFixed(2)
       );
+      if (!isFinite(lon) || lon === 0) lon = null;
+      if (!isFinite(lat) || lat === 0) lat = null;
       
       // system_id 匹配
       let system = null;
@@ -962,7 +969,7 @@ async function importSoilMoistureStations() {
         console.log(`[墒情站] 第${i+4}行缺少必须字段，已跳过：`, row);
         continue;
       }
-      const lon = parseFloat(
+      let lon = parseFloat(
         (
           parseFloat(row['经度-经度-度'] || 0) +
           (parseFloat(row['经度-经度-分'] || 0) / 60) +
@@ -970,13 +977,15 @@ async function importSoilMoistureStations() {
         ).toFixed(2)
       );
       
-      const lat = parseFloat(
+      let lat = parseFloat(
         (
           parseFloat(row['纬度-纬度-度'] || 0) +
           (parseFloat(row['纬度-纬度-分'] || 0) / 60) +
           (parseFloat(row['纬度-纬度-秒'] || 0) / 3600)
         ).toFixed(2)
       );
+      if (!isFinite(lon) || lon === 0) lon = null;
+      if (!isFinite(lat) || lat === 0) lat = null;
       
       // system_id 匹配
       let system = null;
@@ -1194,13 +1203,10 @@ app.get('/api/water_quality_stations/:stationId', (req, res) => {
     [stationId],
     (err, row) => {
       if (err) {
-        console.error('获取水质站详情失败:', err);
         res.status(500).json({ error: err.message });
       } else if (!row) {
-        console.log('水质站详情未找到，stationId:', stationId);
         res.status(404).json({ error: 'Not found' });
       } else {
-        console.log('水质站详情查询成功:', row);
         res.json(row);
       }
     }

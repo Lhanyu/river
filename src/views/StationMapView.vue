@@ -52,11 +52,15 @@ const fetchStations = async () => {
 
 const getHeatmapData = () => {
   let filtered = stations.value;
+  console.log('原始数据数量:', filtered.length);
+  
   if (selectedBasin.value) {
     filtered = filtered.filter(s => s.basin_code === selectedBasin.value);
+    console.log('流域筛选后数量:', filtered.length);
   }
   if (selectedType.value) {
-    filtered = filtered.filter(s => s[selectedType.value]);
+    filtered = filtered.filter(s => s[selectedType.value] === 1);
+    console.log('类型筛选后数量:', filtered.length);
   }
   return filtered
     .map(s => [
@@ -65,6 +69,24 @@ const getHeatmapData = () => {
       1
     ])
     .filter(([lon, lat]) => lon && lat);
+};
+
+const getScatterData = () => {
+  let filtered = stations.value;
+  if (selectedBasin.value) {
+    filtered = filtered.filter(s => s.basin_code === selectedBasin.value);
+  }
+  if (selectedType.value) {
+    filtered = filtered.filter(s => s[selectedType.value] === 1);
+  }
+  return filtered
+    .filter(s => (s.longitude ?? s.lon) && (s.latitude ?? s.lat))
+    .map(s => ({
+      value: [s.longitude ?? s.lon, s.latitude ?? s.lat],
+      name: s.station_name,
+      stationCode: s.station_code,
+      basinName: s.basin_name
+    }));
 };
 
 const renderChart = () => {
@@ -76,21 +98,33 @@ const renderChart = () => {
     setTimeout(renderChart, 100);
     return;
   }
-  const data = getHeatmapData();
-  if (!data.length) {
-    chartInstance.clear();
-    return;
-  }
+  const heatmapData = getHeatmapData();
+  const scatterData = getScatterData();
+  
+  console.log('筛选条件:', { selectedBasin: selectedBasin.value, selectedType: selectedType.value });
+  console.log('热力图数据数量:', heatmapData.length);
+  console.log('散点图数据数量:', scatterData.length);
+  
+  // 即使没有数据也显示地图，只是不显示热力图和散点
   chartInstance.setOption({
     title: { left: 'center', text: '' },
-    tooltip: { trigger: 'item', formatter: p => `经度: ${p.value[0]}<br>纬度: ${p.value[1]}` },
+    tooltip: { 
+      trigger: 'item', 
+      formatter: function(params) {
+        if (params.seriesType === 'scatter') {
+          return `站点名称: ${params.data.name}<br>站点编码: ${params.data.stationCode}<br>经度: ${params.value[0].toFixed(2)}<br>纬度: ${params.value[1].toFixed(2)}<br>流域: ${params.data.basinName || '未知'}`;
+        } else {
+          return `经度: ${params.value[0]}<br>纬度: ${params.value[1]}`;
+        }
+      }
+    },
     geo: {
       map: 'china', roam: true, label: { show: false }, itemStyle: { areaColor: '#e0e6f1', borderColor: '#888' }, emphasis: { itemStyle: { areaColor: '#bcdcff' } }
     },
     visualMap: {
       min: 0,
       max: 5,
-      show: true,
+      show: heatmapData.length > 0, // 只有有热力图数据时才显示
       calculable: false,
       inRange: { color: ['#e0ecf7', '#a0c4ff', '#4361ee', '#ff4800'] },
       right: 30,
@@ -104,7 +138,7 @@ const renderChart = () => {
       {
         type: 'heatmap',
         coordinateSystem: 'geo',
-        data,
+        data: heatmapData,
         pointSize: 5,
         blurSize: 10,
         itemStyle: { opacity: 0.9 },
@@ -113,7 +147,7 @@ const renderChart = () => {
       {
         type: 'scatter',
         coordinateSystem: 'geo',
-        data: data.map(d => [d[0], d[1]]),
+        data: scatterData,
         symbolSize: 4,
         itemStyle: { color: '#d90429', opacity: 0.5 },
         emphasis: { itemStyle: { color: '#ff4800', opacity: 1 } }
