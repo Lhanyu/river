@@ -20,10 +20,10 @@ app.use(express.json());
 
 // 数据库初始化
 const dbPath = path.join(__dirname, 'river_data.db');
-if (fs.existsSync(dbPath)) {
-  fs.unlinkSync(dbPath);
-  console.log('旧数据库文件已删除。');
-}
+// if (fs.existsSync(dbPath)) {
+//   fs.unlinkSync(dbPath);
+//   console.log('旧数据库文件已删除。');
+// }
 
 const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
