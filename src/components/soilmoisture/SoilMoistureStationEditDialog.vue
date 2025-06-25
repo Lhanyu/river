@@ -18,16 +18,16 @@
           <el-form-item label="纬度" prop="latitude">
             <el-input v-model="form.latitude" type="number" />
           </el-form-item>
-        </el-col>
-        <el-col :span="12">
-          <el-form-item label="管理单位" prop="management_unit">
-            <el-input v-model="form.management_unit" />
-          </el-form-item>
           <el-form-item label="设站年份" prop="setup_year">
             <el-input v-model="form.setup_year" type="number" />
           </el-form-item>
           <el-form-item label="设站月份" prop="setup_month">
             <el-input v-model="form.setup_month" type="number" />
+          </el-form-item>
+        </el-col>
+        <el-col :span="12">
+          <el-form-item label="管理单位" prop="management_unit">
+            <el-input v-model="form.management_unit" />
           </el-form-item>
           <el-form-item label="省" prop="province">
             <el-input v-model="form.province" />

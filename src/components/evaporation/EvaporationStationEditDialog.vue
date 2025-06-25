@@ -15,9 +15,6 @@
           <el-form-item label="经度" prop="longitude">
             <el-input v-model="form.longitude" type="number" />
           </el-form-item>
-          <el-form-item label="纬度" prop="latitude">
-            <el-input v-model="form.latitude" type="number" />
-          </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="管理单位" prop="management_unit">
@@ -28,6 +25,9 @@
           </el-form-item>
           <el-form-item label="蒸发器型号" prop="evaporator_type">
             <el-input v-model="form.evaporator_type" />
+          </el-form-item>
+          <el-form-item label="纬度" prop="latitude">
+            <el-input v-model="form.latitude" type="number" />
           </el-form-item>
         </el-col>
         <el-col :span="24">
